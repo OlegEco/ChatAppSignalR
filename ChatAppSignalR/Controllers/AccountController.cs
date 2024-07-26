@@ -1,4 +1,5 @@
 ﻿using ChatAppSignalR.Chat;
+using ChatAppSignalR.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;

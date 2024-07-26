@@ -8,23 +8,26 @@ namespace ChatAppSignalR.Hubs
     {
         private readonly ChatDBContext _dbContext;
 
-        public ChatHub(ChatDBContext dbContext)
+        public ChatHub(ChatDBContext context)
         {
-            _dbContext = dbContext;
+            _dbContext = context;
         }
-        public async Task SendMessage(string user, string message)
+
+        public async Task SendMessage(string user, string message, string recipient)
         {
             var chatMessage = new ChatMessage
             {
-                User = user,
+                Id = Guid.NewGuid(),
                 Message = message,
-                TimeStamp = DateTime.Now,
-                Recipient = null
+                Recipient = recipient,
+                TimeStamp = DateTime.UtcNow,
+                User = user
             };
+
             _dbContext.ChatMessages.Add(chatMessage);
             await _dbContext.SaveChangesAsync();
 
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            await Clients.All.SendAsync("ReceiveMessage", user, message, recipient);
         }
 
         public async Task SendPrivateMessage(string user, string recipient, string message)
@@ -33,27 +36,15 @@ namespace ChatAppSignalR.Hubs
             {
                 User = user,
                 Message = message,
-                TimeStamp = DateTime.Now,
-                Recipient = recipient,
+                TimeStamp = DateTime.UtcNow,
+                Recipient = recipient  // Вказуємо отримувача для приватних повідомлень
             };
+
             _dbContext.ChatMessages.Add(chatMessage);
             await _dbContext.SaveChangesAsync();
 
-            await Clients.User(recipient).SendAsync("ReceiveMessage", user, message);
-        }
-
-        public override Task OnConnectedAsync()
-        {
-            var userName = Context.User.Identity.Name;
-            Clients.All.SendAsync("UserConnected", userName);
-            return base.OnConnectedAsync();
-        }
-
-        public override Task OnDisconnectedAsync(Exception? exception)
-        {
-            var userName = Context.User.Identity.Name;
-            Clients.All.SendAsync("UserDisconnected", userName);
-            return base.OnDisconnectedAsync(exception);
+            var recipientConnectionId = Context.UserIdentifier;  // Отримати ідентифікатор користувача
+            await Clients.User(recipientConnectionId).SendAsync("ReceiveMessage", user, message, recipient);
         }
     }
 }

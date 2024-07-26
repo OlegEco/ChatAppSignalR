@@ -42,8 +42,10 @@ app.MapControllerRoute(
 
 app.MapHub<ChatHub>("/chathub").RequireAuthorization();
 
-app.Run();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    DbInitializer.Initialize(services);
+}
 
-var scope = app.Services.CreateScope();
-var services = scope.ServiceProvider;
-DbInitializer.Initialize(services);
+app.Run();

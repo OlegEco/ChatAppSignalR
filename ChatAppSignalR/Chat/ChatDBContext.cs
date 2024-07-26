@@ -1,6 +1,5 @@
 ﻿using ChatAppSignalR.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 
 namespace ChatAppSignalR.Chat
 {
