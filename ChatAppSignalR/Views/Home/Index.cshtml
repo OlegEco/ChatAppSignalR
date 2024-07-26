@@ -1,4 +1,5 @@
-﻿@{
+﻿<!-- Views/Home/Index.cshtml -->
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -9,6 +10,7 @@
 
 <h2>Chat</h2>
 <input id="userInput" placeholder="Enter your name" />
+<input id="recipientInput" placeholder="Enter recipient (leave empty for public)" />
 <input id="messageInput" placeholder="Enter your message" />
 <button onclick="sendMessage()">Send</button>
 <ul id="messagesList"></ul>
@@ -29,7 +31,13 @@
 
     function sendMessage() {
         const user = document.getElementById("userInput").value;
+        const recipient = document.getElementById("recipientInput").value;
         const message = document.getElementById("messageInput").value;
-        connection.invoke("SendMessage", user, message).catch(err => console.error(err.toString()));
+
+        if (recipient) {
+            connection.invoke("SendPrivateMessage", user, recipient, message).catch(err => console.error(err.toString()));
+        } else {
+            connection.invoke("SendMessage", user, message).catch(err => console.error(err.toString()));
+        }
     }
 </script>
